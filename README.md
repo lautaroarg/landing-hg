@@ -22,7 +22,15 @@ El formulario en Pages requiere desplegar `integrations/HG-Contactos.gs` como ap
 
 Los pasos completos están en [Configurar Sheets](integrations/Configurar-Sheets.md).
 
-## Incluye
+## Publicar en Netlify
+
+`netlify.toml` configura `npm run build:netlify`, el directorio `dist-pages` y las rutas desde `/`. También omite el adaptador de Next.js, porque esta publicación usa la landing estática con Apps Script.
+
+La URL pública de Apps Script ya está configurada para el build. No contiene la clave privada del script. Si se cambia la implementación, actualizar `VITE_HG_APPS_SCRIPT_URL` y volver a desplegar.
+
+Si el panel de Netlify mantiene `@netlify/plugin-nextjs` instalado manualmente y sigue ejecutándolo después de esta configuración, deshabilitar esa integración en el sitio. La configuración de compilación y publicación está declarada en el repositorio.
+
+## Contenido
 
 - Diseño responsive para mobile y escritorio.
 - Video de portada `public/video/parrillas-sin-bordes-web.mp4`, con reproducción sin audio, loop, imagen de respaldo y control de pausa.

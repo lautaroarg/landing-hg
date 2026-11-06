@@ -1,0 +1,13 @@
+[build]
+  command = "npm run build:netlify"
+  publish = "dist-pages"
+
+[build.environment]
+  NODE_VERSION = "22"
+  NETLIFY_NEXT_PLUGIN_SKIP = "true"
+  VITE_HG_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwvVeNA7OaSnxaCA6UKMBs338chQhDLqDiNaTu8e-lNkOW4DYnQS4K4MxS6PyvjKTrQTw/exec"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
