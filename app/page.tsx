@@ -22,7 +22,7 @@ function HeroVideo(){
  },[]);
  async function toggle(){if(!video.current)return;if(playing){video.current.pause()}else{try{await video.current.play()}catch{setFailed(true)}}}
  return <div className="hero-media">
-  <video ref={video} muted playsInline loop preload="none" poster="/images/video-poster.jpg" onPlay={()=>setPlaying(true)} onPause={()=>setPlaying(false)} onError={()=>setFailed(true)} aria-label="Trabajos reales de HG: frentes de parrilla, apertura y detalles de acero inoxidable"><source src="/video/hg-frentes.mp4" type="video/mp4"/></video>
+  <video ref={video} muted playsInline loop preload="none" poster="/images/parrillas-video-poster.jpg" onPlay={()=>setPlaying(true)} onPause={()=>setPlaying(false)} onError={()=>setFailed(true)} aria-label="Trabajos reales de HG: frentes de parrilla, apertura y detalles de acero inoxidable"><source src="/video/parrillas-sin-bordes-web.mp4" type="video/mp4"/></video>
   <div className="media-top"><span><i/> TRABAJOS REALES DE HG</span><span>01 — 03</span></div>
   <div className="media-caption"><span>Diseño que se ve.<br/>Calidad que se siente.</span>{!failed&&<button type="button" className="video-control" onClick={toggle} aria-label={playing?'Pausar video':'Reproducir video'}>{playing?<Pause size={17}/>:<Play size={17}/>}</button>}</div>
  </div>
