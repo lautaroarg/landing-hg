@@ -1,19 +1,96 @@
 "use client";
-import {useState,useRef} from 'react';
-import {ArrowUpRight,ArrowRight,Check,ShieldCheck,Ruler,Wrench} from 'lucide-react';
+
+import {useEffect,useRef,useState} from 'react';
+import {ArrowUpRight,ArrowRight,Check,ShieldCheck,Ruler,Wrench,Pause,Play,ChevronLeft} from 'lucide-react';
+
+const projects=['Frente de parrilla','Frente e interior de parrilla','Renovar una parrilla existente'];
+const timings=['En el próximo mes','En los próximos 3 meses','Más adelante'];
 const photos=['Sí, tengo fotos.','No tengo, pero puedo sacarlas.','No tengo y no puedo sacarlas.'];
-export default function Home(){
- const requestId=useRef('');
- const [step,S]=useState(1),[busy,B]=useState(false),[done,D]=useState(false),[error,E]=useState(''),[wa,W]=useState('');
- const [data,U]=useState({name:'',phone:'',location:'',project:'',timing:'',photo:''});
- const set=(key:string,value:string)=>U(d=>({...d,[key]:value}));
- async function send(e:React.FormEvent){e.preventDefault();B(true);E('');try{let id=requestId.current;if(!id){id=crypto.randomUUID();requestId.current=id}const r=await fetch('/api/leads',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...data,id})});const result=await r.json() as {error?:string;whatsapp?:string};if(!r.ok)throw Error(result.error);W(result.whatsapp||'');D(true)}catch(e){E(e instanceof Error?e.message:'No pudimos enviar tu consulta. Intentá de nuevo.')}finally{B(false)}}
- return <><header><a className="brand" href="#"><span className="mark">H<span>G</span></span><span>HERRERÍA GALVÁN<small>FRENTES DE PARRILLA A MEDIDA</small></span></a><a className="nav" href="#cotizar">Cotizá tu proyecto <ArrowUpRight size={16}/></a></header><main>
- <section className="hero"><div className="hero-copy"><span className="eyebrow">● &nbsp; HECHO A MEDIDA. HECHO PARA DURAR.</span><h1>Tu parrilla.<br/>Un nuevo<br/><em>frente.</em></h1><p>Transformá tu quincho con un frente de parrilla diseñado para tu espacio y tu forma de disfrutarlo.</p><a className="button" href="#cotizar">Quiero cotizar mi proyecto <ArrowUpRight size={21}/></a><span className="note"><Check size={15}/>Diseño, fabricación e instalación</span><div className="hero-bottom">HERRERÍA CON OFICIO.<br/><strong>DETALLES QUE HACEN LA DIFERENCIA.</strong></div></div><div className="hero-image"><img src="/images/hero.jpg" alt="Frente de parrilla HG con tapa guillotina y terminaciones en acero inoxidable" fetchPriority="high"/><div className="photo-caption"><span>UN PROYECTO REAL DE HG</span><p>Diseño que se ve.<br/>Calidad que se siente.</p></div><span className="index">01 / HG</span></div></section>
- <div className="trust"><span><Ruler/>100% a medida</span><span><Wrench/>Instalación incluida</span><span><ShieldCheck/>6 meses de garantía</span></div>
- <section className="work"><div className="intro"><div><span className="eyebrow blue">EL CAMBIO SE NOTA</span><h2>De una parrilla abierta<br/>a un quincho renovado.</h2></div><p>Un frente que integra diseño, protección y guardado. Cada proyecto se adapta al espacio existente.</p></div><div className="comparison"><figure><img src="/images/before.jpg" alt="Parrilla abierta antes de la renovación" loading="lazy"/><figcaption>ANTES <span>El punto de partida</span></figcaption></figure><figure><img src="/images/after.jpg" alt="La misma parrilla renovada con frente metálico y puertas inferiores" loading="lazy"/><figcaption>DESPUÉS <span>El sello de HG ↗</span></figcaption></figure></div><div className="benefits">{[['01','Diseñado para vos','Frente e interior según tu espacio, el uso y el estilo de tu quincho.'],['02','Bien resuelto, por dentro y por fuera','Tapa guillotina contrapesada, herrajes de calidad y opciones de guardado a medida.'],['03','De la idea a la instalación','Nos ocupamos del diseño, la fabricación y la instalación. Y te acompañamos después de la entrega.']].map(([n,t,p])=><div key={n}><span>{n}</span><h3>{t}</h3><p>{p}</p></div>)}</div></section>
- <section className="quote" id="cotizar"><div className="quote-copy"><span className="eyebrow">EMPECEMOS POR TU IDEA</span><h2>El próximo<br/>frente puede<br/>ser el <em>tuyo.</em></h2><p>Contanos qué tenés en mente. Con algunos datos y una foto del espacio, podemos empezar a preparar tu presupuesto.</p><div className="promise"><ShieldCheck/><span>Trabajo a medida.<br/><strong>Respaldo después de la entrega.</strong></span></div></div><div className="form-card" aria-live="polite">{done?<div className="success"><span className="success-icon"><Check size={30}/></span><span className="eyebrow blue">CONSULTA RECIBIDA</span><h3>¡Gracias por dejarnos tu contacto!</h3><p>Pronto te escribiremos.</p>{wa&&<><p className="reminder">{data.photo==='1'?'Ya podés enviarnos las fotos del espacio por WhatsApp.':'Sacá una foto del espacio y envianosla por WhatsApp para avanzar con tu presupuesto.'}</p><a className="button" href={wa} target="_blank" rel="noopener noreferrer">Continuar por WhatsApp <ArrowUpRight size={19}/></a></>}</div>:<><div className="form-heading"><span>TU PROYECTO, A MEDIDA</span><span>0{step} / 02</span></div><div className="progress"><span style={{width:step===1?'50%':'100%'}}/></div><h3>{step===1?'Contanos sobre tu parrilla':'¿Cómo te contactamos?'}</h3><p className="subtitle">{step===1?'Unos pocos datos para orientarte mejor.':'Ya falta poco para dar el primer paso.'}</p><form onSubmit={step===1?e=>{e.preventDefault();S(2)}:send}>{step===1?<><label htmlFor="location">¿En qué localidad es el proyecto?</label><input id="location" autoComplete="address-level2" placeholder="Ej.: Pilar, Buenos Aires" maxLength={120} required value={data.location} onChange={e=>set('location',e.target.value)}/><label htmlFor="project">¿Qué querés hacer?</label><select id="project" required value={data.project} onChange={e=>set('project',e.target.value)}><option value="" disabled>Seleccioná una opción</option>{['Frente de parrilla','Frente e interior de parrilla','Renovar una parrilla existente'].map(x=><option key={x}>{x}</option>)}</select><label htmlFor="timing">¿Cuándo pensás hacerlo?</label><select id="timing" required value={data.timing} onChange={e=>set('timing',e.target.value)}><option value="" disabled>Seleccioná una opción</option>{['En el próximo mes','En los próximos 3 meses','Más adelante'].map(x=><option key={x}>{x}</option>)}</select><button className="button">Continuar <ArrowRight size={19}/></button></>:<><div className="contact-fields"><div><label htmlFor="name">Tu nombre</label><input id="name" autoComplete="name" required maxLength={100} placeholder="Nombre y apellido" value={data.name} onChange={e=>set('name',e.target.value)}/></div><div><label htmlFor="phone">Tu WhatsApp</label><input id="phone" type="tel" autoComplete="tel" required pattern="[+0-9 ()-]{8,30}" placeholder="11 1234 5678" value={data.phone} onChange={e=>set('phone',e.target.value)}/></div></div><fieldset><legend>¿Tenés una foto de la parrilla o del espacio?</legend><p>La necesitamos para preparar tu presupuesto.</p>{photos.map((text,i)=><label className={'radio '+(data.photo===String(i+1)?'selected':'')} key={text}><input type="radio" required name="photo" value={i+1} checked={data.photo===String(i+1)} onChange={e=>set('photo',e.target.value)}/>{text}</label>)}</fieldset><p className="privacy">Al enviar, aceptás que HG Herrería Galván te contacte para conversar sobre tu proyecto.</p>{error&&<p className="error" role="alert">{error}</p>}<button className="button" disabled={busy}>{busy?'Enviando consulta…':'Solicitar mi presupuesto'}<ArrowUpRight size={19}/></button><button className="back" type="button" disabled={busy} onClick={()=>S(1)}>← Volver</button></>}</form></>}</div></section>
- <section className="faq"><div><span className="eyebrow blue">ANTES DE EMPEZAR</span><h2>Algunas respuestas.</h2></div><div>{[['¿Trabajan con medidas estándar?','Cada frente e interior se diseña a medida, según el espacio, el uso y el estilo del quincho.'],['¿Qué incluye el servicio?','Diseño, fabricación e instalación del frente e interior de parrilla, según el alcance de tu proyecto. Las terminaciones y los accesorios se definen al cotizar.'],['¿Los trabajos tienen garantía?','Sí, los trabajos cuentan con 6 meses de garantía y acompañamiento después de la entrega.']].map(([q,a])=><details key={q}><summary>{q}<span>+</span></summary><p>{a}</p></details>)}</div></section></main><footer><a className="brand" href="#"><span className="mark">H<span>G</span></span><span>HERRERÍA GALVÁN<small>HECHO PARA TU ESPACIO.</small></span></a><a href="https://www.instagram.com/parrillas.asadores.hg/" target="_blank" rel="noopener noreferrer">Seguinos en Instagram ↗</a><span>© {new Date().getFullYear()} HG Herrería Galván</span></footer></>;
+
+function Brand(){return <a className="brand" href="#inicio" aria-label="HG Herrería Galván, inicio"><span className="mark" aria-hidden="true">H<span>G</span></span><span>HERRERÍA GALVÁN<small>FRENTES DE PARRILLA A MEDIDA</small></span></a>}
+
+function HeroVideo(){
+ const video=useRef<HTMLVideoElement>(null);
+ const [playing,setPlaying]=useState(false),[failed,setFailed]=useState(false);
+ useEffect(()=>{
+  const element=video.current;if(!element)return;
+  const motion=window.matchMedia('(prefers-reduced-motion: reduce)');
+  const connection=(navigator as Navigator & {connection?:{saveData?:boolean}}).connection;
+  if(!motion.matches&&!connection?.saveData) void element.play().catch(()=>setPlaying(false));
+  const onMotion=()=>{if(motion.matches)element.pause()};motion.addEventListener('change',onMotion);
+  return ()=>motion.removeEventListener('change',onMotion);
+ },[]);
+ async function toggle(){if(!video.current)return;if(playing){video.current.pause()}else{try{await video.current.play()}catch{setFailed(true)}}}
+ return <div className="hero-media">
+  <video ref={video} muted playsInline loop preload="none" poster="/images/video-poster.jpg" onPlay={()=>setPlaying(true)} onPause={()=>setPlaying(false)} onError={()=>setFailed(true)} aria-label="Trabajos reales de HG: frentes de parrilla, apertura y detalles de acero inoxidable"><source src="/video/hg-frentes.mp4" type="video/mp4"/></video>
+  <div className="media-top"><span><i/> TRABAJOS REALES DE HG</span><span>01 — 03</span></div>
+  <div className="media-caption"><span>Diseño que se ve.<br/>Calidad que se siente.</span>{!failed&&<button type="button" className="video-control" onClick={toggle} aria-label={playing?'Pausar video':'Reproducir video'}>{playing?<Pause size={17}/>:<Play size={17}/>}</button>}</div>
+ </div>
 }
 
+function QuoteForm({onDone}:{onDone:()=>void}){
+ const [step,setStep]=useState(1),[busy,setBusy]=useState(false),[done,setDone]=useState(false),[error,setError]=useState(''),[whatsapp,setWhatsapp]=useState('');
+ const requestId=useRef(''),card=useRef<HTMLDivElement>(null),focusTitle=useRef<HTMLHeadingElement>(null);
+ const [data,setData]=useState({name:'',phone:'',location:'',project:'',timing:'',photo:''});
+ const set=(key:string,value:string)=>setData(d=>({...d,[key]:value}));
+ function changeStep(next:number){setStep(next);setError('');requestAnimationFrame(()=>{card.current?.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'});focusTitle.current?.focus({preventScroll:true})})}
+ async function send(event:React.FormEvent){
+  event.preventDefault();setBusy(true);setError('');
+  try{
+   if(!requestId.current)requestId.current=crypto.randomUUID();
+   const response=await fetch('/api/leads',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...data,id:requestId.current})});
+   const result=await response.json() as {error?:string;whatsapp?:string};
+   if(!response.ok)throw Error(result.error||'No pudimos enviar tu consulta. Intentá de nuevo.');
+   setWhatsapp(result.whatsapp||'');setDone(true);onDone();
+   requestAnimationFrame(()=>{focusTitle.current?.focus({preventScroll:true});card.current?.scrollIntoView({behavior:'smooth',block:'start'})});
+  }catch(err){setError(err instanceof Error?err.message:'No pudimos enviar tu consulta. Intentá de nuevo.')}finally{setBusy(false)}
+ }
+ return <div ref={card} className="form-card" id="formulario">
+  {done?<div className="success" role="status"><span className="success-icon"><Check size={30}/></span><span className="eyebrow blue">CONSULTA RECIBIDA</span><h3 ref={focusTitle} tabIndex={-1}>¡Gracias por dejarnos tu contacto!</h3><p>Pronto te escribiremos.</p>{whatsapp&&<><p className="reminder">{data.photo==='1'?'Envianos las fotos del espacio y seguimos con tu presupuesto.':'Sacá una foto del espacio y envianosla para avanzar con tu presupuesto.'}</p><a className="button whatsapp" href={whatsapp} target="_blank" rel="noopener noreferrer">Continuar por WhatsApp <ArrowUpRight size={20}/></a></>}</div>:<>
+   <div className="form-heading"><span>TU PRESUPUESTO EMPIEZA ACÁ</span><span>PASO {step} DE 2</span></div>
+   <div className="progress" aria-hidden="true"><span style={{width:step===1?'50%':'100%'}}/></div>
+   <h3 ref={focusTitle} tabIndex={-1}>{step===1?'Contanos qué necesitás':'Dejanos tu contacto'}</h3>
+   <p className="form-subtitle">{step===1?'Elegí las opciones que mejor describen tu proyecto.':'Una foto nos ayuda a preparar tu presupuesto.'}</p>
+   <form onSubmit={step===1?event=>{event.preventDefault();changeStep(2)}:send}>
+    {step===1?<>
+     <label className="field-label" htmlFor="location">¿En qué localidad es el proyecto?</label>
+     <input id="location" autoComplete="address-level2" placeholder="Ej.: Pilar, Buenos Aires" maxLength={120} required value={data.location} onChange={event=>set('location',event.target.value)}/>
+     <fieldset><legend>¿Qué querés hacer?</legend><div className="choices project-choices">{projects.map((text,index)=><label className={'choice '+(data.project===text?'selected':'')} key={text}><input type="radio" name="project" required value={text} checked={data.project===text} onChange={event=>set('project',event.target.value)}/><span>{['Solo el frente','Frente + interior','Renovar mi parrilla'][index]}</span><Check size={16}/></label>)}</div></fieldset>
+     <fieldset><legend>¿Cuándo pensás hacerlo?</legend><div className="choices timing-choices">{timings.map((text,index)=><label className={'choice '+(data.timing===text?'selected':'')} key={text}><input type="radio" name="timing" required value={text} checked={data.timing===text} onChange={event=>set('timing',event.target.value)}/><span>{['Este mes','En 3 meses','Más adelante'][index]}</span><Check size={16}/></label>)}</div></fieldset>
+     <button className="button" type="submit">Continuar <ArrowRight size={19}/></button>
+     <p className="form-note">En el próximo paso te pedimos nombre y WhatsApp.</p>
+    </>:<>
+     <div className="contact-fields"><div><label className="field-label" htmlFor="name">Tu nombre</label><input id="name" autoComplete="name" required maxLength={100} placeholder="Nombre y apellido" value={data.name} onChange={event=>set('name',event.target.value)}/></div><div><label className="field-label" htmlFor="phone">Tu WhatsApp</label><input id="phone" type="tel" inputMode="tel" autoComplete="tel" required pattern="[+0-9 ()-]{8,30}" maxLength={30} placeholder="11 1234 5678" value={data.phone} onChange={event=>set('phone',event.target.value)}/></div></div>
+     <fieldset className="photo-field"><legend>¿Tenés una foto de la parrilla o del espacio?</legend><p>La necesitamos para preparar tu presupuesto.</p><div className="photo-choices">{photos.map((text,index)=><label className={'choice photo-choice '+(data.photo===String(index+1)?'selected':'')} key={text}><input type="radio" name="photo" required value={index+1} checked={data.photo===String(index+1)} onChange={event=>set('photo',event.target.value)}/><span>{text}</span><Check size={17}/></label>)}</div></fieldset>
+     <p className="privacy">Al enviar, aceptás que HG Herrería Galván te contacte para conversar sobre tu proyecto.</p>
+     {error&&<p className="error" role="alert">{error}</p>}
+     <button className="button" type="submit" disabled={busy}>{busy?'Enviando consulta…':'Solicitar mi presupuesto'}{!busy&&<ArrowUpRight size={20}/>}</button>
+     <button className="back" type="button" disabled={busy} onClick={()=>changeStep(1)}><ChevronLeft size={15}/> Volver al proyecto</button>
+    </>}
+   </form>
+  </>}
+ </div>
+}
 
+export default function Home(){
+ const [showSticky,setShowSticky]=useState(false),[heroCtaVisible,setHeroCtaVisible]=useState(true),[done,setDone]=useState(false);
+ useEffect(()=>{
+  const quote=document.getElementById('cotizar');if(!quote)return;
+  const observer=new IntersectionObserver(entries=>{for(const entry of entries){if(entry.target===quote)setShowSticky(!entry.isIntersecting);else setHeroCtaVisible(entry.isIntersecting)}},{threshold:0});observer.observe(quote);const heroCta=document.querySelector('.hero-actions .button');if(heroCta)observer.observe(heroCta);return ()=>observer.disconnect();
+ },[]);
+ return <><a className="skip-link" href="#cotizar">Ir al formulario de presupuesto</a>
+  <header className="site-header"><div className="header-inner"><Brand/><nav aria-label="Navegación principal"><a className="work-link" href="#trabajos">Nuestros trabajos</a><a className="nav-cta" href="#cotizar">Cotizar mi proyecto <ArrowUpRight size={17}/></a></nav></div></header>
+  <main id="inicio">
+   <section className="hero"><div className="hero-inner">
+    <div className="hero-intro"><span className="eyebrow">HECHO A MEDIDA. HECHO PARA DURAR.</span><h1>Frentes de parrilla <br/><em>a tu medida.</em></h1></div>
+    <HeroVideo/>
+    <div className="hero-actions"><p>Renová tu quincho con diseño, fabricación e instalación en un solo lugar.</p><a className="button" href="#cotizar">Cotizar mi proyecto <ArrowUpRight size={21}/></a><span className="hero-note"><Check size={15}/> Cada proyecto se diseña para tu espacio.</span><a className="hero-secondary" href="#trabajos">Mirá el antes y después <ArrowRight size={15}/></a></div>
+   </div></section>
+   <div className="trust-strip"><span><Ruler/>100% a medida</span><span><Wrench/>Instalación incluida</span><span><ShieldCheck/>6 meses de garantía</span></div>
+   <section className="work section-width" id="trabajos"><div className="section-intro"><div><span className="eyebrow blue">EL CAMBIO SE NOTA</span><h2>Tu quincho puede <br/>verse así.</h2></div><p>De una parrilla abierta a un frente que integra diseño, protección y guardado.</p></div><div className="comparison"><figure><img src="/images/before.jpg" width="630" height="610" alt="Parrilla de ladrillo abierta antes de la renovación" loading="lazy"/><figcaption><span className="comparison-tag">ANTES</span><span>El punto de partida</span></figcaption></figure><figure><img src="/images/after.jpg" width="630" height="610" alt="La misma parrilla renovada con frente metálico y puertas de guardado" loading="lazy"/><figcaption><span className="comparison-tag">DESPUÉS</span><span>El sello de HG <ArrowUpRight size={17}/></span></figcaption></figure></div></section>
+   <section className="quote" id="cotizar"><div className="quote-inner section-width"><div className="quote-copy"><span className="eyebrow">HABLEMOS DE TU PROYECTO</span><h2>Tu nuevo frente <br/>empieza <em>acá.</em></h2><p>Contanos qué necesitás y dónde es la instalación. Después vemos el espacio y preparamos tu presupuesto.</p><div className="quote-benefits"><div><Ruler/><span><strong>Diseño a medida</strong>Según tu espacio y el estilo de tu quincho.</span></div><div><Wrench/><span><strong>Nos ocupamos de todo</strong>Diseño, fabricación e instalación.</span></div><div><ShieldCheck/><span><strong>Respaldo después de la entrega</strong>6 meses de garantía.</span></div></div></div><QuoteForm onDone={()=>setDone(true)}/></div></section>
+   <section className="faq section-width"><div><span className="eyebrow blue">ANTES DE EMPEZAR</span><h2>Algunas respuestas.</h2></div><div>{[['¿Trabajan con medidas estándar?','Cada frente e interior se diseña a medida, según el espacio, el uso y el estilo del quincho.'],['¿Qué incluye el servicio?','Diseño, fabricación e instalación del frente e interior de parrilla, según el alcance de tu proyecto. Las terminaciones y los accesorios se definen al cotizar.'],['¿Los trabajos tienen garantía?','Sí, los trabajos cuentan con 6 meses de garantía y acompañamiento después de la entrega.']].map(([q,a])=><details key={q}><summary>{q}<span aria-hidden="true">+</span></summary><p>{a}</p></details>)}</div></section>
+  </main><footer className="section-width"><Brand/><a href="https://www.instagram.com/parrillas.asadores.hg/" target="_blank" rel="noopener noreferrer">Seguinos en Instagram <ArrowUpRight size={16}/></a><span>© {new Date().getFullYear()} HG Herrería Galván</span></footer>
+  {showSticky&&!heroCtaVisible&&!done&&<div className="mobile-cta"><a className="button" href="#cotizar">Pedir presupuesto <ArrowUpRight size={20}/></a></div>}
+ </>
+}

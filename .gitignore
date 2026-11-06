@@ -43,3 +43,7 @@ yarn-error.log*
 
 # OS metadata
 .DS_Store
+
+/sheets-build/
+/hg-google-sheet.json
+/video-contact-sheet.jpg
