@@ -2,7 +2,25 @@
 
 Landing para captar consultas por frentes de parrilla a medida desde Instagram.
 
-Sitio actual: https://hg-herreria-galvan.skrotox.chatgpt.site
+GitHub Pages: https://lautaroarg.github.io/landing-hg/
+
+Versión original en Sites: https://hg-herreria-galvan.skrotox.chatgpt.site
+
+## Publicar en GitHub Pages
+
+La carpeta `pages/` utiliza la misma landing React con una compilación Vite estática. Las rutas de imágenes, estilos y video incluyen la base `/landing-hg/`.
+
+```sh
+npm run install:ci
+npm run build:pages
+npm run preview:pages
+```
+
+El workflow `.github/workflows/pages.yml` compila y publica `dist-pages` en cada push a `main`. En **Settings → Pages**, el origen debe ser **GitHub Actions**. No se publica el README como página.
+
+El formulario en Pages requiere desplegar `integrations/HG-Contactos.gs` como aplicación web y configurar su URL `/exec` en la variable de Actions **HG_APPS_SCRIPT_URL**. Luego se vuelve a ejecutar el workflow. No publicar `HG_FORM_SECRET` como variable de cliente. Sin URL, la landing se muestra pero informa que las solicitudes online están pendientes de habilitación. No confirma ni simula envíos.
+
+Los pasos completos están en [Configurar Sheets](integrations/Configurar-Sheets.md).
 
 ## Incluye
 
@@ -15,7 +33,7 @@ Sitio actual: https://hg-herreria-galvan.skrotox.chatgpt.site
 
 ## Requisitos y desarrollo
 
-Node.js 22.13 o posterior. El proyecto usa React, Vinext/Vite y Cloudflare Workers; el backend requiere D1 y no funciona como una exportación HTML estática.
+Node.js 22.13 o posterior. La versión original de Sites usa React, Vinext/Vite y Cloudflare Workers con D1. La compilación alternativa de Pages publica solo el frontend y usa Apps Script como receptor externo.
 
 ```sh
 npm run install:ci

@@ -48,3 +48,6 @@ yarn-error.log*
 /hg-google-sheet.json
 /video-contact-sheet.jpg
 /video-new-preview.jpg
+
+/dist-pages/
+/admin/

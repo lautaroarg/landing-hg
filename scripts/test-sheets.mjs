@@ -12,7 +12,7 @@ const sheet={getLastRow:()=>rows.length,getRange(row,col,height=1,width=1){retur
 };}};
 let held=false;
 const context={
- console,PropertiesService:{getScriptProperties:()=>({getProperty:key=>({HG_FORM_SECRET:'test-secret',SPREADSHEET_ID:'test-sheet'})[key]})},
+ console,PropertiesService:{getScriptProperties:()=>({getProperty:key=>({HG_FORM_SECRET:'test-secret',SPREADSHEET_ID:'test-sheet',HG_PUBLIC_FORM_ENABLED:'true'})[key]})},
  LockService:{getScriptLock:()=>({waitLock(){held=true;},hasLock:()=>held,releaseLock(){held=false;}})},
  SpreadsheetApp:{openById:()=>({getSheetByName:()=>sheet}),flush(){}},
  ContentService:{MimeType:{JSON:'json'},createTextOutput:text=>({setMimeType:()=>JSON.parse(text)})},
@@ -26,6 +26,7 @@ assert.equal(rows.length,0);
 for(const photo of ['1','2','3']){
  const d={...lead,id:lead.id.slice(0,-1)+photo,photo,secret:'test-secret'};
  assert.equal(post(d).ok,true);
+ assert.equal(post(d).whatsapp===null,photo==='3');
  assert.equal(post(d).ok,true);
  assert.equal(held,false);
 }
@@ -33,6 +34,10 @@ assert.equal(rows.length,4);
 assert.equal(rows[1][8],'Sí');assert.equal(rows[2][8],'Sí');assert.equal(rows[3][8],'No');
 assert.equal(context.safeText_('=IMPORTXML(1)'),"'=IMPORTXML(1)");
 assert.equal(post({...lead,name:'',secret:'test-secret'}).ok,false);
+assert.equal(post({...lead,id:lead.id.slice(0,-1)+'4'}).ok,true);
+assert.equal(post({...lead,id:lead.id.slice(0,-1)+'4'}).ok,true);
+assert.equal(rows.length,5);
+assert.equal(post({...lead,photo:'__proto__'}).ok,false);
 
 const compiled=ts.transpileModule(fs.readFileSync('app/api/leads/sheets.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText;
 const {saveToSheets}=await import('data:text/javascript;base64,'+Buffer.from(compiled).toString('base64'));

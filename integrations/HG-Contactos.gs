@@ -13,6 +13,9 @@ function configurar() {
     props.setProperty('HG_FORM_SECRET', Utilities.getUuid() + Utilities.getUuid());
   }
   props.setProperty('SPREADSHEET_ID', spreadsheet.getId());
+  // Receptor público de escritura para la landing de GitHub Pages.
+  // No expone una lectura de contactos ni devuelve datos de la planilla.
+  props.setProperty('HG_PUBLIC_FORM_ENABLED', 'true');
   spreadsheet.setSpreadsheetTimeZone('America/Argentina/Buenos_Aires');
   var sheet = spreadsheet.getSheetByName('Contactos HG') || spreadsheet.insertSheet('Contactos HG');
   ensureHeaders_(sheet);
@@ -31,10 +34,12 @@ function doPost(e) {
     var d = JSON.parse(e.postData.contents);
     var props = PropertiesService.getScriptProperties();
     var secret = props.getProperty('HG_FORM_SECRET');
-    if (!secret || d.secret !== secret) return json_({ok:false});
+    var serverAuthorized = secret && d.secret === secret;
+    var publicFormEnabled = props.getProperty('HG_PUBLIC_FORM_ENABLED') === 'true';
+    if (!serverAuthorized && !(publicFormEnabled && !d.secret)) return json_({ok:false});
     var keys = ['id','name','phone','location','project','timing','photo'];
     if (keys.some(function(k){return typeof d[k] !== 'string';})) return json_({ok:false});
-    if (!/^[0-9a-f-]{36}$/i.test(d.id) || !d.name.trim() || d.name.length>100 || !d.location.trim() || d.location.length>120 || !/^\+?[0-9 ()-]{8,30}$/.test(d.phone) || d.phone.replace(/\D/g,'').length<8 || !HG_PHOTOS[d.photo] || ['Frente de parrilla','Frente e interior de parrilla','Renovar una parrilla existente'].indexOf(d.project)<0 || ['En el próximo mes','En los próximos 3 meses','Más adelante'].indexOf(d.timing)<0) return json_({ok:false});
+    if (!/^[0-9a-f-]{36}$/i.test(d.id) || !d.name.trim() || d.name.length>100 || !d.location.trim() || d.location.length>120 || !/^\+?[0-9 ()-]{8,30}$/.test(d.phone) || d.phone.replace(/\D/g,'').length<8 || ['1','2','3'].indexOf(d.photo)<0 || ['Frente de parrilla','Frente e interior de parrilla','Renovar una parrilla existente'].indexOf(d.project)<0 || ['En el próximo mes','En los próximos 3 meses','Más adelante'].indexOf(d.timing)<0) return json_({ok:false});
     var spreadsheetId = props.getProperty('SPREADSHEET_ID');
     if (!spreadsheetId) return json_({ok:false});
     lock = LockService.getScriptLock();
@@ -44,13 +49,13 @@ function doPost(e) {
     ensureHeaders_(sheet);
     var last = sheet.getLastRow();
     if (last>1 && sheet.getRange(2,1,last-1,1).createTextFinder(d.id).matchEntireCell(true).findNext()) {
-      return json_({ok:true,id:d.id});
+      return success_(d);
     }
     var row = [d.id,new Date(),safeText_(d.name),safeText_(d.phone),safeText_(d.location),safeText_(d.project),safeText_(d.timing),HG_PHOTOS[d.photo],d.photo==='3'?'No':'Sí','Nuevo'];
     sheet.getRange(last+1,1,1,row.length).setValues([row]);
     sheet.getRange(last+1,2).setNumberFormat('dd/MM/yyyy HH:mm:ss');
     SpreadsheetApp.flush();
-    return json_({ok:true,id:d.id});
+    return success_(d);
   } catch (err) {
     console.error('No se pudo registrar la consulta de HG.');
     return json_({ok:false});
@@ -71,3 +76,9 @@ function safeText_(value) {
 function json_(data) {
   return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
 }
+
+function success_(d) {
+  var message = 'Hola HG, soy ' + d.name.trim() + '. Envié una consulta desde la web.\nLocalidad: ' + d.location.trim() + '\nProyecto: ' + d.project + '\nPlazo: ' + d.timing + '\n' + (d.photo === '1' ? 'Tengo fotos del espacio para enviarles.' : 'Puedo sacar fotos del espacio para enviarles.');
+  return json_({ok:true,id:d.id,whatsapp:d.photo==='3'?null:'https://wa.me/5491149486842?text='+encodeURIComponent(message)});
+}
+
