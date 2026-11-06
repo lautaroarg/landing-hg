@@ -9,3 +9,4 @@
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important;animation:none!important}}
 .form-pending{font-size:12px;line-height:1.7;color:#72551d;background:#fff7e6;border:1px solid #ead7ac;border-radius:3px;padding:12px;margin-bottom:20px}.button:disabled{cursor:not-allowed}
 .hero-media:after{display:none}.hero-media>.video-control{position:absolute;right:16px;bottom:16px;z-index:1}
+.comparison img{height:auto;aspect-ratio:4/5;object-fit:contain;object-position:center;background:#e9e7e1}@media(max-width:700px){.comparison{grid-template-columns:1fr;gap:18px}.comparison img{height:auto;aspect-ratio:4/5;object-fit:contain}.comparison figcaption{padding:14px 16px}.comparison figcaption>span:last-child{display:flex;font-size:11px}.comparison-tag{font-size:10px}}
