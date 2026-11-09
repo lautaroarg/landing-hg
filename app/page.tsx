@@ -3,6 +3,12 @@
 import {useEffect,useRef,useState} from 'react';
 import {ArrowUpRight,ArrowRight,Check,ShieldCheck,Ruler,Wrench,Pause,Play,ChevronLeft} from 'lucide-react';
 
+declare global {
+ interface Window {
+  fbq?: (command: 'track', event: 'Lead') => void;
+ }
+}
+
 const projects=['Frente de parrilla','Frente e interior de parrilla','Renovar una parrilla existente'];
 const timings=['En el próximo mes','En los próximos 3 meses','Más adelante'];
 const photos=['Sí, tengo fotos.','No tengo, pero puedo sacarlas.','No tengo y no puedo sacarlas.'];
@@ -30,6 +36,7 @@ function HeroVideo({assetBase}:{assetBase:string}){
 function QuoteForm({onDone,formEndpoint,formMode}:{onDone:()=>void;formEndpoint:string;formMode:'server'|'apps-script'}){
  const [step,setStep]=useState(1),[busy,setBusy]=useState(false),[done,setDone]=useState(false),[error,setError]=useState(''),[whatsapp,setWhatsapp]=useState('');
  const requestId=useRef(''),card=useRef<HTMLDivElement>(null),focusTitle=useRef<HTMLHeadingElement>(null);
+ const leadTracked=useRef(false);
  const [data,setData]=useState({name:'',phone:'',location:'',project:'',timing:'',photo:''});
  const set=(key:string,value:string)=>setData(d=>({...d,[key]:value}));
  function changeStep(next:number){setStep(next);setError('');requestAnimationFrame(()=>{card.current?.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'});focusTitle.current?.focus({preventScroll:true})})}
@@ -42,6 +49,14 @@ function QuoteForm({onDone,formEndpoint,formMode}:{onDone:()=>void;formEndpoint:
    const result=await response.json() as {ok?:boolean;id?:string;error?:string;whatsapp?:string};
    if(!response.ok||result.ok!==true||(formMode==='apps-script'&&result.id!==requestId.current))throw Error(result.error||'No pudimos confirmar tu consulta. Intentá de nuevo.');
    setWhatsapp(result.whatsapp||'');setDone(true);onDone();
+   if(!leadTracked.current){
+    leadTracked.current=true;
+    try {
+     window.fbq?.('track','Lead');
+    } catch {
+     // Tracking must not affect a confirmed quote request.
+    }
+   }
    requestAnimationFrame(()=>{focusTitle.current?.focus({preventScroll:true});card.current?.scrollIntoView({behavior:'smooth',block:'start'})});
   }catch(err){setError(err instanceof Error?err.message:'No pudimos enviar tu consulta. Intentá de nuevo.')}finally{setBusy(false)}
  }

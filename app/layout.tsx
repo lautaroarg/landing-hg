@@ -17,7 +17,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es-AR">
-      <body className="antialiased">{children}</body>
+      <head>
+        <script src="/meta-pixel.js" defer />
+      </head>
+      <body className="antialiased">
+        <noscript>
+          <img
+            alt=""
+            width="1"
+            height="1"
+            style={{ display: "none" }}
+            src="https://www.facebook.com/tr?id=2104389757046906&ev=PageView&noscript=1"
+          />
+        </noscript>
+        {children}
+      </body>
     </html>
   );
 }
