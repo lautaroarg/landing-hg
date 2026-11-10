@@ -35,7 +35,7 @@ function HeroVideo({assetBase}:{assetBase:string}){
 }
 
 function QuoteForm({onDone,formEndpoint,formMode}:{onDone:()=>void;formEndpoint:string;formMode:'server'|'apps-script'}){
- const [step,setStep]=useState(1),[busy,setBusy]=useState(false),[done,setDone]=useState(false),[error,setError]=useState(''),[whatsapp,setWhatsapp]=useState('');
+ const [step,setStep]=useState(1),[busy,setBusy]=useState(false),[done,setDone]=useState(false),[error,setError]=useState('');
  const requestId=useRef(''),card=useRef<HTMLDivElement>(null),focusTitle=useRef<HTMLHeadingElement>(null);
  const leadTracked=useRef(false);
  const [data,setData]=useState({name:'',phone:'',location:'',project:'',timing:'',photo:''});
@@ -49,8 +49,6 @@ function QuoteForm({onDone,formEndpoint,formMode}:{onDone:()=>void;formEndpoint:
    const response=await fetch(formEndpoint,{method:'POST',headers:{'Content-Type':formMode==='apps-script'?'text/plain;charset=utf-8':'application/json'},body:JSON.stringify({...data,id:requestId.current}),redirect:'follow',credentials:'omit',signal:AbortSignal.timeout(30000)});
    const result=await response.json() as {ok?:boolean;id?:string;error?:string;whatsapp?:string};
    if(!response.ok||result.ok!==true||(formMode==='apps-script'&&result.id!==requestId.current))throw Error(result.error||'No pudimos confirmar tu consulta. Intentá de nuevo.');
-   // Older Apps Script deployments can still return the previous number.
-   setWhatsapp(result.whatsapp?.replace(/^https:\/\/wa\.me\/\d+(?=\?|$)/,hgWhatsAppUrl)||'');setDone(true);onDone();
    if(!leadTracked.current){
     leadTracked.current=true;
     try {
@@ -59,11 +57,18 @@ function QuoteForm({onDone,formEndpoint,formMode}:{onDone:()=>void;formEndpoint:
      // Tracking must not affect a confirmed quote request.
     }
    }
+   // Preserve the prefilled message and use the current number with older Apps Script deployments.
+   const whatsapp=result.whatsapp?.match(/^https:\/\/wa\.me\/\d+(\?.*)?$/);
+   if(whatsapp){
+    window.location.assign(hgWhatsAppUrl+(whatsapp[1]||''));
+    return;
+   }
+   setDone(true);onDone();
    requestAnimationFrame(()=>{focusTitle.current?.focus({preventScroll:true});card.current?.scrollIntoView({behavior:'smooth',block:'start'})});
   }catch(err){setError(err instanceof Error?err.message:'No pudimos enviar tu consulta. Intentá de nuevo.')}finally{setBusy(false)}
  }
  return <div ref={card} className="form-card" id="formulario">
-  {done?<div className="success" role="status"><span className="success-icon"><Check size={30}/></span><span className="eyebrow blue">CONSULTA RECIBIDA</span><h3 ref={focusTitle} tabIndex={-1}>¡Gracias por dejarnos tu contacto!</h3><p>Pronto te escribiremos.</p>{whatsapp&&<><p className="reminder">{data.photo==='1'?'Envianos las fotos del espacio y seguimos con tu presupuesto.':'Sacá una foto del espacio y envianosla para avanzar con tu presupuesto.'}</p><a className="button whatsapp" href={whatsapp} target="_blank" rel="noopener noreferrer">Continuar por WhatsApp <ArrowUpRight size={20}/></a></>}</div>:<>
+  {done?<div className="success" role="status"><span className="success-icon"><Check size={30}/></span><span className="eyebrow blue">CONSULTA RECIBIDA</span><h3 ref={focusTitle} tabIndex={-1}>¡Gracias por dejarnos tu contacto!</h3><p>Pronto te escribiremos.</p></div>:<>
    <div className="form-heading"><span>TU PRESUPUESTO EMPIEZA ACÁ</span><span>PASO {step} DE 2</span></div>
    <div className="progress" aria-hidden="true"><span style={{width:step===1?'50%':'100%'}}/></div>
    <h3 ref={focusTitle} tabIndex={-1}>{step===1?'Contanos qué necesitás':'Dejanos tu contacto'}</h3>

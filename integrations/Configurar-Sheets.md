@@ -35,6 +35,6 @@ Después hay que desplegar una versión para aplicar los secretos.
 
 ## Filtro de fotos
 
-Las tres opciones se registran. Las opciones 1 y 2 reciben el botón de WhatsApp después del guardado. La opción 3 recibe «¡Gracias por dejarnos tu contacto! Pronto te escribiremos.», sin enlace al chat.
+Las tres opciones se registran. Las opciones 1 y 2 abren WhatsApp directamente después del guardado. La opción 3 recibe «¡Gracias por dejarnos tu contacto! Pronto te escribiremos.».
 
 Los reintentos de un mismo envío no duplican filas. Al cambiar el script, actualizá su implementación conservando la URL.
