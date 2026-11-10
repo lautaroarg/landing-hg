@@ -25,8 +25,10 @@ assert.equal(post({...lead,secret:'wrong'}).ok,false);
 assert.equal(rows.length,0);
 for(const photo of ['1','2','3']){
  const d={...lead,id:lead.id.slice(0,-1)+photo,photo,secret:'test-secret'};
- assert.equal(post(d).ok,true);
- assert.equal(post(d).whatsapp===null,photo==='3');
+ const result=post(d);
+ assert.equal(result.ok,true);
+ if(photo==='3')assert.equal(result.whatsapp,null);
+ else assert.match(result.whatsapp,/^https:\/\/wa\.me\/5491169304334\?text=/);
  assert.equal(post(d).ok,true);
  assert.equal(held,false);
 }

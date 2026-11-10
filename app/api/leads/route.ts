@@ -1,5 +1,6 @@
 import {getDb} from '../../../db';
 import {leads} from '../../../db/schema';
+import {hgWhatsAppUrl} from '../../../lib/whatsapp';
 import {env} from 'cloudflare:workers';
 import {saveToSheets} from './sheets';
 export async function POST(request:Request){
@@ -13,6 +14,6 @@ export async function POST(request:Request){
  const config=env as unknown as {HG_SHEETS_URL?:string;HG_SHEETS_SECRET?:string};
  if(config.HG_SHEETS_URL) await saveToSheets({id:d.id,name,phone,location,project:d.project,timing:d.timing,photo:d.photo},config.HG_SHEETS_URL,config.HG_SHEETS_SECRET||'');
  const message=`Hola HG, soy ${name}. Envié una consulta desde la web.\nLocalidad: ${location}\nProyecto: ${d.project}\nPlazo: ${d.timing}\n${d.photo==='1'?'Tengo fotos del espacio para enviarles.':'Puedo sacar fotos del espacio para enviarles.'}`;
- return Response.json({ok:true,whatsapp:d.photo==='3'?null:`https://wa.me/5491149486842?text=${encodeURIComponent(message)}`},{headers:{'Cache-Control':'no-store'}});
+ return Response.json({ok:true,whatsapp:d.photo==='3'?null:`${hgWhatsAppUrl}?text=${encodeURIComponent(message)}`},{headers:{'Cache-Control':'no-store'}});
  }catch{console.error('Lead submission failed');return Response.json({error:'No pudimos guardar tu consulta. Por favor, intentá de nuevo.'},{status:500})}
 }

@@ -79,6 +79,6 @@ function json_(data) {
 
 function success_(d) {
   var message = 'Hola HG, soy ' + d.name.trim() + '. Envié una consulta desde la web.\nLocalidad: ' + d.location.trim() + '\nProyecto: ' + d.project + '\nPlazo: ' + d.timing + '\n' + (d.photo === '1' ? 'Tengo fotos del espacio para enviarles.' : 'Puedo sacar fotos del espacio para enviarles.');
-  return json_({ok:true,id:d.id,whatsapp:d.photo==='3'?null:'https://wa.me/5491149486842?text='+encodeURIComponent(message)});
+  return json_({ok:true,id:d.id,whatsapp:d.photo==='3'?null:'https://wa.me/5491169304334?text='+encodeURIComponent(message)});
 }
 

@@ -2,6 +2,7 @@
 
 import {useEffect,useRef,useState} from 'react';
 import {ArrowUpRight,ArrowRight,Check,ShieldCheck,Ruler,Wrench,Pause,Play,ChevronLeft} from 'lucide-react';
+import {hgWhatsAppUrl} from '../lib/whatsapp';
 
 declare global {
  interface Window {
@@ -48,7 +49,8 @@ function QuoteForm({onDone,formEndpoint,formMode}:{onDone:()=>void;formEndpoint:
    const response=await fetch(formEndpoint,{method:'POST',headers:{'Content-Type':formMode==='apps-script'?'text/plain;charset=utf-8':'application/json'},body:JSON.stringify({...data,id:requestId.current}),redirect:'follow',credentials:'omit',signal:AbortSignal.timeout(30000)});
    const result=await response.json() as {ok?:boolean;id?:string;error?:string;whatsapp?:string};
    if(!response.ok||result.ok!==true||(formMode==='apps-script'&&result.id!==requestId.current))throw Error(result.error||'No pudimos confirmar tu consulta. Intentá de nuevo.');
-   setWhatsapp(result.whatsapp||'');setDone(true);onDone();
+   // Older Apps Script deployments can still return the previous number.
+   setWhatsapp(result.whatsapp?.replace(/^https:\/\/wa\.me\/\d+(?=\?|$)/,hgWhatsAppUrl)||'');setDone(true);onDone();
    if(!leadTracked.current){
     leadTracked.current=true;
     try {
